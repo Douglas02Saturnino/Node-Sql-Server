@@ -1,23 +1,24 @@
 require("dotenv").config();
 
+const { execSQLQuery } = require("./db");
 const port = process.env.PORT;
-const connStr = process.env.CONNECTION_STRING;
-const sql = require("mssql");
 const express = require("express");
 const app = express();
 
-let connection = null;
-async function getConnection(){
-    if(connection) return connection;
-    connection = sql.connect(connStr);
-    return connection;
-}
+app.use(express.json())
 
-async function execSQLQuery(sqlQry){
-    const request = getConnection().request();
-    const { recordset } = await request.query(sqlQry);
-    return recordSet;
-}
+app.delete("/clientes/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    await execSQLQuery(`DELETE FROM Clientes WHERE ID=${id}`);
+    res.sendStatus(204);
+})
+
+app.patch("/clientes/id:", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { nome, cpf } = req.body;
+    await execSQLQuery(`UPDATE Clientes SET Nome='${nome}', CPF='${cpf}' WHERE ID=${id}`);
+    res.sendStatus(200);
+})
 
 app.post("/clientes", async (req, res) => {
     const { id, nome, cpf } = req.body;
